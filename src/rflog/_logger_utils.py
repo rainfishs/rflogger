@@ -72,7 +72,7 @@ class Logger:
         self._logger_handler = self._error_handler = None
         self.LOG_FOLDER = log_folder
         self.ERROR_FOLDER = error_folder if error_folder else os.path.join(
-            log_folder, "error")
+            log_folder, "errors")
         self.warm_up()
 
     def archive_old_logs(self):
