@@ -11,7 +11,7 @@ from time import time
 
 class Formatter(logging.Formatter):
 
-    def init__(self, tz, *args, **kwargs):
+    def __init__(self, tz, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         def ctr(timestamp: float | None):
@@ -204,7 +204,7 @@ class Logger:
                                              ".latest.log",
                                              encoding="utf-8",
                                              mode="a")
-        logger_handler.setFormatter(Formatter())
+        logger_handler.setFormatter(Formatter(self._tz))
         logger_handler.setLevel(LOG_LEVEL)
         # 確保 logs/error 資料夾存在
         if not Path(ERROR_FOLDER).exists():
@@ -214,7 +214,7 @@ class Logger:
                                             ".latest_error.log",
                                             encoding="utf-8",
                                             mode="a")
-        error_handler.setFormatter(Formatter())
+        error_handler.setFormatter(Formatter(self._tz))
         error_handler.setLevel(logging.ERROR)
 
         self._logger.addHandler(logger_handler)  # bind to logger: main
