@@ -193,7 +193,6 @@ class Logger:
             self.create_handler()
         else:
             self.create_handler()
-            self.rotate_log_files()
 
     def create_handler(self):
         # custom log handler
