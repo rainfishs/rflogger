@@ -235,6 +235,18 @@ class Logger:
             self._error_handler.close()
         self._logger_handler = self._error_handler = None
 
+    # 使用系統函數取得 .latest.log 的創建時間
+    @property
+    def latest_log_date(self) -> datetime | None:
+        LOG_FOLDER = self.LOG_FOLDER
+        latest_log_path = Path(LOG_FOLDER) / ".latest.log"
+        if not latest_log_path.exists():
+            return None
+        # 取得檔案的建立時間
+        timestamp = latest_log_path.stat().st_birthtime
+        created_time = datetime.fromtimestamp(timestamp, tz=self._tz)
+        return created_time
+
     def rotate_log_files(self):
         """
         輪替 log 檔案。
@@ -249,26 +261,12 @@ class Logger:
             logging.error(".latest.log 或 .latest_error.log 不存在")
             return
 
-        # 讀取第一行的創建時間
-        with open(latest_log_path, "r", encoding="utf-8") as f:
-            first_line = f.readline().strip()
-            try:
-                latest_log_ctime = datetime.strptime(first_line,
-                                                     "%Y-%m-%d %H:%M:%S")
-            except ValueError:
-                logging.error(f"無法解析 .latest.log 的創建時間: {first_line}")
-                return
-
-        # 如果是今天的 log，就 return 不用輪替
-        latest_log_date = latest_log_ctime.date()
-        today = datetime.now(self._tz).date()
-
-        if latest_log_date == today:
-            return
-
         # 關閉目前的 handler
         self.close_handler()
-
+        latest_log_date = self.latest_log_date
+        if latest_log_date is None:
+            logging.error("無法取得 .latest.log 的創建時間")
+            return
         previous_date = latest_log_date.strftime("%Y%m%d")
         # 重新命名 .latest.log -> YYYYMMDD.log 和 .latest_error.log -> YYYYMMDD_error.log
         latest_log_path = Path(LOG_FOLDER) / ".latest.log"
